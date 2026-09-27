@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# boundaryctl — store admin. Usage: boundaryctl init | report [audit|grants|inbox]
+# Store resolves from $FLEET_BOUNDARY, else this script's parent dir.
+set -uo pipefail
+STORE="${FLEET_BOUNDARY:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+BPY="$STORE/boundary.py"
+[ -f "$BPY" ] || BPY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/boundary.py"
+DB="$STORE/boundary.db"
+case "${1:-}" in
+  init) FLEET_BOUNDARY="$STORE" python3 "$BPY" init ;;
+  report)
+    case "${2:-audit}" in
+      audit)  sqlite3 -header -column "$DB" "SELECT ts, agent, tool_name, decision, rule, resource FROM audit_events ORDER BY id DESC LIMIT 25" ;;
+      grants) sqlite3 -header -column "$DB" "SELECT ts, agent, tool_name, decision, rule, resource FROM audit_events WHERE rule LIKE 'granted:%' OR rule LIKE 'standing:%' OR rule LIKE 'oneshot:%' OR decision='grant_invalid' ORDER BY id DESC LIMIT 50" ;;
+      inbox)  sqlite3 -header -column "$DB" "SELECT id, created_at, agent, tripwire, seen_count, status FROM inbox_items ORDER BY id DESC LIMIT 25" ;;
+      *) echo "usage: boundaryctl report [audit|grants|inbox]" >&2; exit 2 ;;
+    esac ;;
+  *) echo "usage: boundaryctl init | report [audit|grants|inbox]" >&2; exit 2 ;;
+esac

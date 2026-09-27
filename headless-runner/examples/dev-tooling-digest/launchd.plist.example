@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Copy to ~/Library/LaunchAgents/com.example.dev-tooling-digest.plist, fix the
+     paths, then: launchctl bootstrap gui/$(id -u) <plist>.
+     After EDITING a loaded plist, bootout + bootstrap again. An edited-but-not-
+     reloaded job can stay "loaded" and silently stop firing. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.example.dev-tooling-digest</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/path/to/agent-fleet-patterns/headless-runner/runner.sh</string>
+    <string>/path/to/agent-fleet-patterns/headless-runner/examples/dev-tooling-digest</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>11</integer><key>Minute</key><integer>33</integer></dict>
+  <key>EnvironmentVariables</key>
+  <dict><key>AUTOMATION_ID</key><string>dev-tooling-digest</string></dict>
+  <key>StandardOutPath</key><string>/tmp/dev-tooling-digest.out</string>
+  <key>StandardErrorPath</key><string>/tmp/dev-tooling-digest.err</string>
+</dict>
+</plist>

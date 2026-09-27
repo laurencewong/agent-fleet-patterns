@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# inboxctl — escalation inbox. Usage:
+#   inboxctl list [--status pending|resolved|expired]
+#   inboxctl show <id>
+#   inboxctl resolve <id> <allow-once|deny|noted|rule-proposed> --by <who>
+#   inboxctl gc
+# Exit 3 = lost the resolve race (first responder already won).
+# Exit 4 = allow-once refused (only the owner mints).
+set -uo pipefail
+STORE="${FLEET_BOUNDARY:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+BPY="$STORE/boundary.py"
+[ -f "$BPY" ] || BPY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/boundary.py"
+FLEET_BOUNDARY="$STORE" exec python3 "$BPY" inbox "$@"

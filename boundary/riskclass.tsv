@@ -1,0 +1,23 @@
+# riskclass.tsv — fleet defaults: tool_pattern <TAB> riskclass <TAB> target_arg <TAB> note
+# Patterns: exact tool name > "mcp__*" (any undeclared MCP tool) > "*" (any other tool).
+# Per-agent overrides live in riskclass.d/<agent>.tsv (same format, wins per pattern).
+# target_arg "-" = none. Unknown mcp__* defaults EXTERNAL = fail toward gating.
+# Seed every MCP tool you actually use here, or they will all gate as EXTERNAL.
+Read	READ	-	-
+Glob	READ	-	-
+Grep	READ	-	-
+NotebookRead	READ	-	-
+WebSearch	READ	-	egress-read; matches current allow posture
+WebFetch	READ	-	idem; flag: query strings do leave the machine
+TodoWrite	READ	-	internal
+Task	READ	-	subagents inherit the same hook
+Write	WRITE_LOCAL	file_path	-
+Edit	WRITE_LOCAL	file_path	-
+MultiEdit	WRITE_LOCAL	file_path	-
+NotebookEdit	WRITE_LOCAL	notebook_path	-
+Update	WRITE_LOCAL	file_path	-
+Bash	EXEC	-	content-classified by hook tripwires (a static class per tool cannot work for a shell)
+mcp__plugin_imessage_imessage__chat_messages	READ	-	-
+mcp__plugin_imessage_imessage__reply	EXTERNAL	chat_id	the one tool that has standing grants (cron -> owner self-chat)
+mcp__*	EXTERNAL	-	unknown MCP default: fail toward gating
+*	READ	-	non-MCP unknown: current posture (allow); flipping this is a separate decision

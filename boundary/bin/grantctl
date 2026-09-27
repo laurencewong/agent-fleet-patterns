@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# grantctl — standing-grant admin. Usage:
+#   grantctl list  --agent <a>     show rows + validity (INVALID rows are ignored by gate)
+#   grantctl check --agent <a>     exit 1 if any row is invalid
+# Rows live in $FLEET_BOUNDARY/grants.d/<agent>.tsv, git-versioned; only rows
+# with ratified_by=<OWNER> are ever honored (enforced in boundary.py).
+set -uo pipefail
+STORE="${FLEET_BOUNDARY:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+BPY="$STORE/boundary.py"
+[ -f "$BPY" ] || BPY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/boundary.py"
+FLEET_BOUNDARY="$STORE" exec python3 "$BPY" grants "$@"

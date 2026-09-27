@@ -1,0 +1,60 @@
+# Example profile: daily "AI agents dev-tooling" intel.
+# The profile is the ONLY thing that changes per recipient; the engine never
+# hardcodes a person. Delivery target lives in the runner's job config, not here.
+name: AI Dev Tooling
+title: "Agent Tooling Radar"
+tone: "builder POV; concrete over conceptual; say what changed and why it matters"
+maxItems: 8
+maxAgeDays: 7               # hard staleness cut
+freshWindowHours: 48        # recency boost decays to 0 over two days (ranking, not a gate)
+sourceTrust: ../state/ai-dev-tooling.source-trust.json   # optional; written by update_trust.py
+
+# Beats, in priority order (ties go to the earlier beat).
+beats:
+  tool-breakage:            # co-occurrence: a named tool AND a failure word, both required
+    weight: 1.4
+    lean: negative          # negativity adds to the score on this beat
+    coOccur:
+      - ["claude code", "cursor", "copilot", "aider", "codex", "mcp", "langchain"]
+      - ["outage", "regression", "broken", "bug", "deprecated", "breaking change", "rate limit"]
+  agent-frameworks:
+    weight: 1.5
+    terms: ["ai agent", "ai agents", "multi-agent", "subagent", "agent sdk", "mcp",
+            "model context protocol", "tool use", "computer use", "agent harness",
+            "coding agent", "agentic", "orchestration", "headless"]
+  guides-and-builds:
+    weight: 1.3
+    terms: ["show hn", "how i built", "tutorial", "guide", "open source", "postmortem",
+            "lessons learned", "deep dive", "best practices", "template", "starter kit"]
+  model-releases:
+    weight: 1.2
+    terms: ["new model", "model release", "api update", "changelog", "launches",
+            "announces", "introducing", "benchmark", "context window"]
+
+negLex: ["flaky", "hallucinat", "timeout"]
+starsAsSentiment: true      # for appstore reviews: 1-2 stars = negative regardless of wording
+
+sources:
+  hackernews:               # free, Algolia API
+    queries: ["ai agents", "mcp server", "coding agent", "claude code"]
+    frontPage: true
+    windowDays: 2
+    minPoints: 10
+    hitsPerPage: 30
+  github:                   # free, unauthenticated search: new repos with traction
+    queries: ["ai agent", "mcp server"]
+    createdDays: 14
+    minStars: 30
+    perPage: 10
+  rss:                      # free
+    - "https://simonwillison.net/atom/everything/"
+    - "https://huggingface.co/blog/feed.xml"
+    - "https://lobste.rs/rss"
+  # appstore:               # free, public review RSS; pair with starsAsSentiment
+  #   pages: 2
+  #   apps: [{ id: "<numeric app id>", name: "<app name>" }]
+
+signal:
+  minRelevance: 0.50
+  minNegativity: 0          # raise (e.g. 0.3) for a complaints-only digest
+  quietDay: silent          # nothing cleared the floor -> send nothing

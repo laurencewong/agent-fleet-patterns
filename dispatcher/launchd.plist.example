@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Replace YOUR_HOME. Load with:
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.example.reply-watchdog.plist -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.reply-watchdog</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>YOUR_HOME/agent-fleet-patterns/dispatcher/reply-watchdog.sh</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>WATCHDOG_CONF</key>
+		<string>YOUR_HOME/agent-fleet-patterns/dispatcher/watchdog.conf</string>
+		<key>HOME</key>
+		<string>YOUR_HOME</string>
+		<!-- launchd starts with an empty locale. Without these, emoji and
+		     dashes in the alert arrive as mojibake. -->
+		<key>LANG</key>
+		<string>en_US.UTF-8</string>
+		<key>LC_ALL</key>
+		<string>en_US.UTF-8</string>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>StartInterval</key>
+	<integer>300</integer>
+	<key>StandardOutPath</key>
+	<string>YOUR_HOME/Library/Logs/reply-watchdog.log</string>
+	<key>StandardErrorPath</key>
+	<string>YOUR_HOME/Library/Logs/reply-watchdog.log</string>
+</dict>
+</plist>

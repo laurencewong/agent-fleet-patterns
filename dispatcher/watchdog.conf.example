@@ -1,0 +1,8 @@
+# Copy to watchdog.conf, fill in, and point WATCHDOG_CONF at it.
+OWNER_HANDLE="+15555550100"
+CHAT_GUIDS="any;-;+15555550100 any;+;YOUR_GROUP_CHAT_ID"
+ALERT_CHAT="any;-;+15555550100"
+SEND_CMD="$HOME/bin/imessage-send.sh"   # reads stdin, sends to the chat in $1
+STATE_DIR="$HOME/.reply-watchdog"
+STALE_MIN=15
+ACTIVE_HOURS="6-23"

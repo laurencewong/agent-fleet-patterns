@@ -9,7 +9,8 @@ servers for tools, and talk to me over iMessage.
 The model calls were the easy part. The hard parts were getting agents the
 right context, keeping what they said true, and deciding where an agent stops
 and a human has to approve. This repo pulls out the three pieces I'd reuse,
-sanitized, with tests.
+sanitized, with tests, plus a fourth I added after the fleet's own front desk
+went quiet for four hours.
 
 ## Architecture
 
@@ -35,7 +36,7 @@ jobs never send from inside a model session. They draft, and a shell step
 sends. Anything outward-facing that isn't pre-approved is denied and parked
 for me to approve from my phone.
 
-## The three patterns
+## The patterns
 
 ### [`boundary/`](boundary): the governed-agent boundary
 
@@ -90,6 +91,23 @@ trust multiplier learned from what the human actually acts on.
 dropped good items on slow days. And dedup has to key on canonical identity,
 because tracking parameters made the same item look new every day.
 
+### [`dispatcher/`](dispatcher): keep the live agent answering
+
+**Problem.** The agent I text also did the work I texted it about. On a busy
+day it went about four hours without replying while it worked through long
+jobs one at a time, and the usage window ran out twice.
+
+**Design.** The live session sends a receipt, answers inline only if it can
+do so in about two minutes, and hands everything else to background workers
+tracked on a markdown dispatch board. A capacity check reads the current
+usage window before each dispatch and pushes non-urgent work to an overnight
+backlog when it's tight. A launchd watchdog outside the model alerts me if
+my newest message has gone 15 minutes without a reply.
+
+**Lesson.** "Stay responsive" can't be enforced by the thing that stopped
+responding. The rule lives in the prompt, but the check that it held has to
+run somewhere a stuck or rate-limited session can't block.
+
 ## Rules that became code
 
 - **No autonomous publishing.** Content agents draft and a human approves. The
@@ -129,6 +147,7 @@ bash boundary/tests/boundary.test.sh         # 96 cases
 bash boundary/tests/hook.test.sh             # 59 cases
 bash headless-runner/tests/runner.test.sh    # 48 cases
 python3 -m unittest discover -s spotter/tests   # 18 cases
+bash dispatcher/tests/dispatcher.test.sh     # 25 cases
 ```
 
 Requirements: bash 3.2+, python3, jq, sqlite3, PyYAML (spotter only). The tests
